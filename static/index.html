@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#0b0f17">
+  <title>APK Workstation</title>
+  <link rel="stylesheet" href="/assets/css/main.css">
+</head>
+<body>
+  <div class="app-shell">
+    <!-- TOP HEADER -->
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-logo" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="4" y="4" width="16" height="16" rx="4"></rect>
+            <path d="M9 9h6v6H9z"></path>
+            <path d="M9 1v3M15 1v3M9 20v3M15 20v3M20 9h3M20 14h3M1 9h3M1 14h3"></path>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <div class="brand-title-row">
+            <h1>APK Workstation</h1>
+            <span class="badge-pill">AES-256 Vault</span>
+          </div>
+          <p class="brand-sub">Virtual HTTPS Runtime • Termux Builder</p>
+        </div>
+      </div>
+
+      <div class="topbar-actions">
+        <span id="serverStatusPill" class="status-pill online">
+          <span class="dot"></span> Ready
+        </span>
+        <button id="hardReloadBtn" type="button" class="btn-ghost" title="Purge browser cache and hard reload UI">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"></path>
+            <path d="M21 3v5h-5"></path>
+          </svg>
+          <span>Hard Reload</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- MAIN WORKSPACE -->
+    <div class="workspace">
+      <!-- SIDEBAR (Desktop) / BOTTOM DOCK (Mobile) -->
+      <nav class="nav-rail" aria-label="Primary Navigation">
+        <button type="button" class="nav-item active" data-view="studio">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+            <polyline points="2 17 12 22 22 17"></polyline>
+            <polyline points="2 12 12 17 22 12"></polyline>
+          </svg>
+          <span>Studio</span>
+        </button>
+
+        <button type="button" class="nav-item mobile-only-nav" data-view="console">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="4 17 10 11 4 5"></polyline>
+            <line x1="12" y1="19" x2="20" y2="19"></line>
+          </svg>
+          <span>Console</span>
+        </button>
+
+        <button type="button" class="nav-item" data-view="builds">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+            <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+            <line x1="12" y1="22.08" x2="12" y2="12"></line>
+          </svg>
+          <span>Builds</span>
+          <span id="buildsCountBadge" class="nav-badge">0</span>
+        </button>
+
+        <button type="button" class="nav-item" data-view="keystores">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"></path>
+          </svg>
+          <span>Keystores</span>
+        </button>
+      </nav>
+
+      <!-- VIEWPORT CONTENT -->
+      <main class="content-area">
+        <!-- STUDIO + CONSOLE SPLIT VIEW -->
+        <div id="view-studio" class="view-section active studio-grid">
+          <!-- LEFT COLUMN: CONFIGURATION CARDS -->
+          <div class="studio-config">
+            <!-- SAVED APP PROFILES -->
+            <section class="card">
+              <div class="card-header">
+                <div>
+                  <h2>Saved App Profiles</h2>
+                  <p class="card-desc">One-tap load with auto-bumped version codes</p>
+                </div>
+                <button type="button" id="resetProfileBtn" class="btn-ghost btn-sm">+ New App</button>
+              </div>
+              <div id="profilesBar" class="profiles-strip">
+                <span class="muted-text">Loading profiles...</span>
+              </div>
+            </section>
+
+            <!-- APPLICATION IDENTITY -->
+            <section class="card">
+              <div class="card-header">
+                <div>
+                  <h2>Application Identity</h2>
+                  <p class="card-desc">Launcher title, package identifier, and adaptive icon</p>
+                </div>
+              </div>
+
+              <div class="form-grid-2">
+                <div class="field">
+                  <label for="appName">App Display Name</label>
+                  <input type="text" id="appName" placeholder="e.g. Book Studio" value="My Custom App">
+                </div>
+                <div class="field">
+                  <label for="packageId">Package ID</label>
+                  <input type="text" id="packageId" placeholder="com.resteus.bookstudio" value="com.resteus.store">
+                </div>
+              </div>
+
+              <div class="form-grid-3">
+                <div class="field">
+                  <label for="versionCode">Version Code</label>
+                  <input type="number" id="versionCode" value="1" min="1">
+                </div>
+                <div class="field">
+                  <label for="versionName">Version Name</label>
+                  <input type="text" id="versionName" value="1.0.0">
+                </div>
+                <div class="field">
+                  <label for="orientation">Orientation</label>
+                  <select id="orientation">
+                    <option value="0">Auto / Sensor</option>
+                    <option value="1">Portrait Lock</option>
+                    <option value="2">Landscape Lock</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-grid-2">
+                <div class="field">
+                  <label for="minSdk">Min SDK API (Android 5.0 = 21)</label>
+                  <input type="number" id="minSdk" value="21" min="16" max="999">
+                </div>
+                <div class="field">
+                  <label for="targetSdk">Target SDK API (Play Store = 36+)</label>
+                  <input type="number" id="targetSdk" value="36" min="21" max="999">
+                </div>
+              </div>
+
+              <div class="field">
+                <label>Custom Launcher Icon (PNG, JPG, WEBP)</label>
+                <label class="dropzone" for="customIcon">
+                  <input type="file" id="customIcon" accept="image/png, image/jpeg, image/webp">
+                  <div class="dropzone-inner" id="iconUploadLabel">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                      <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                      <polyline points="21 15 16 10 5 21"></polyline>
+                    </svg>
+                    <span>Select square launcher icon (optional)</span>
+                  </div>
+                </label>
+              </div>
+            </section>
+
+            <!-- WEB PROJECT SOURCE -->
+            <section class="card">
+              <div class="card-header">
+                <div>
+                  <h2>Web Project Source</h2>
+                  <p class="card-desc">Paste a live website link OR bundle an offline HTML/JS ZIP</p>
+                </div>
+              </div>
+
+              <div class="field">
+                <label for="websiteUrl">Option 1: Live Website URL (https://)</label>
+                <input type="text" id="websiteUrl" placeholder="https://example.com (builds live HTTPS wrapper APK)">
+              </div>
+
+              <div class="divider-or"><span>OR OFFLINE ENCRYPTED BUNDLE (.ZIP)</span></div>
+
+              <div class="field">
+                <label>Upload Project Archive (.zip)</label>
+                <label class="dropzone dropzone-accent" for="projectZip">
+                  <input type="file" id="projectZip" accept=".zip">
+                  <div class="dropzone-inner" id="zipUploadLabel">
+                    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                      <polyline points="17 8 12 3 7 8"></polyline>
+                      <line x1="12" y1="3" x2="12" y2="15"></line>
+                    </svg>
+                    <span>Tap to choose web project .ZIP</span>
+                  </div>
+                </label>
+              </div>
+
+              <div class="divider-or"><span>OR LOCAL TERMUX DIRECTORY</span></div>
+
+              <div class="field">
+                <label for="localPath">Local Folder Path (containing index.html)</label>
+                <input type="text" id="localPath" placeholder="~/apk-workstation/projects/book-studio">
+              </div>
+            </section>
+
+            <!-- SECURITY & RUNTIME CAPABILITIES -->
+            <details class="card accordion-card">
+              <summary>
+                <div>
+                  <h2>Security &amp; Runtime Flags</h2>
+                  <p class="card-desc">Tap to customize offline mode, screenshots, camera &amp; permissions</p>
+                </div>
+              </summary>
+
+              <div class="switch-list">
+                <label class="switch-row">
+                  <div class="switch-copy">
+                    <span class="switch-title">Safe-Area System Bars</span>
+                    <span class="switch-sub">Prevent top status bar &amp; bottom navigation bar from covering website headers/menus</span>
+                  </div>
+                  <input type="checkbox" id="respectSystemBars" checked>
+                  <span class="switch-ui"></span>
+                </label>
+
+                <label class="switch-row">
+                  <div class="switch-copy">
+                    <span class="switch-title">Pull-to-Refresh Gesture</span>
+                    <span class="switch-sub">Swipe down at top of page to reload live websites, encrypted ZIPs, or local files</span>
+                  </div>
+                  <input type="checkbox" id="pullToRefresh" checked>
+                  <span class="switch-ui"></span>
+                </label>
+
+                <label class="switch-row">
+                  <div class="switch-copy">
+                    <span class="switch-title">Force Offline Mode</span>
+                    <span class="switch-sub">Block all external HTTP/HTTPS requests; restrict to local virtual host</span>
+                  </div>
+                  <input type="checkbox" id="forceOffline" checked>
+                  <span class="switch-ui"></span>
+                </label>
+
+                <label class="switch-row">
+                  <div class="switch-copy">
+                    <span class="switch-title">Block Screenshots (FLAG_SECURE)</span>
+                    <span class="switch-sub">Prevent screen capture, recording, and recent-apps thumbnail previews</span>
+                  </div>
+                  <input type="checkbox" id="blockScreenshots">
+                  <span class="switch-ui"></span>
+                </label>
+
+                <label class="switch-row">
+                  <div class="switch-copy">
+                    <span class="switch-title">Copy / Paste &amp; Selection</span>
+                    <span class="switch-sub">Allow text selection and system clipboard access inside WebView</span>
+                  </div>
+                  <input type="checkbox" id="allowCopy" checked>
+                  <span class="switch-ui"></span>
+                </label>
+
+                <label class="switch-row">
+                  <div class="switch-copy">
+                    <span class="switch-title">Pinch-to-Zoom</span>
+                    <span class="switch-sub">Enable multi-touch zoom gestures on viewport content</span>
+                  </div>
+                  <input type="checkbox" id="allowZoom">
+                  <span class="switch-ui"></span>
+                </label>
+
+                <label class="switch-row">
+                  <div class="switch-copy">
+                    <span class="switch-title">Camera &amp; Scanner Access</span>
+                    <span class="switch-sub">Grant WebRTC / HTML5 camera permissions for QR or photo capture</span>
+                  </div>
+                  <input type="checkbox" id="allowCamera">
+                  <span class="switch-ui"></span>
+                </label>
+
+                <label class="switch-row">
+                  <div class="switch-copy">
+                    <span class="switch-title">Legacy Storage Permission</span>
+                    <span class="switch-sub">Optional—Downloads &amp; file picker already work without this popup</span>
+                  </div>
+                  <input type="checkbox" id="allowStorage">
+                  <span class="switch-ui"></span>
+                </label>
+
+                <label class="switch-row">
+                  <div class="switch-copy">
+                    <span class="switch-title">GPS Geolocation</span>
+                    <span class="switch-sub">Allow HTML5 Geolocation API requests</span>
+                  </div>
+                  <input type="checkbox" id="enableLocation">
+                  <span class="switch-ui"></span>
+                </label>
+
+                <label class="switch-row">
+                  <div class="switch-copy">
+                    <span class="switch-title">Push Notifications</span>
+                    <span class="switch-sub">Request Android 13+ POST_NOTIFICATIONS runtime permission</span>
+                  </div>
+                  <input type="checkbox" id="enableNotifications">
+                  <span class="switch-ui"></span>
+                </label>
+              </div>
+            </details>
+
+            <!-- SIGNING KEYSTORE SELECTION -->
+            <details class="card accordion-card">
+              <summary>
+                <div>
+                  <h2>Signing Keystore</h2>
+                  <p class="card-desc">Default: master.jks • Tap to change signing key or alias</p>
+                </div>
+              </summary>
+
+              <div class="form-grid-3">
+                <div class="field">
+                  <label for="keystoreSelect">Keystore File</label>
+                  <select id="keystoreSelect"></select>
+                </div>
+                <div class="field">
+                  <label for="keyAlias">Key Alias</label>
+                  <input type="text" id="keyAlias" value="master">
+                </div>
+                <div class="field">
+                  <label for="keyPass">Password</label>
+                  <input type="password" id="keyPass" value="password123" placeholder="Keystore password">
+                </div>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:10px;flex-wrap:wrap;">
+                <span id="ksVerifyHint" class="muted-text">Select a keystore to auto-fill its alias</span>
+                <div style="display:flex;gap:6px;">
+                  <button type="button" id="togglePassBtn" class="btn-ghost btn-sm">Show</button>
+                  <button type="button" id="testKsBtn" class="btn-ghost btn-sm">Verify Key</button>
+                </div>
+              </div>
+            </details>
+
+            <!-- MOBILE PRIMARY CTA -->
+            <div class="mobile-build-cta">
+              <button type="button" class="btn-primary btn-lg trigger-build-btn">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2">
+                  <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                </svg>
+                <span>Compile &amp; Sign Encrypted APK</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- RIGHT COLUMN (Desktop) / CONSOLE TAB (Mobile): TELEMETRY & BUILD -->
+          <div id="consoleColumn" class="studio-console">
+            <section class="card console-card">
+              <div class="card-header">
+                <div>
+                  <h2>Build Telemetry</h2>
+                  <p class="card-desc" id="stageSubtitle">Idle — ready to compile</p>
+                </div>
+                <div class="console-actions">
+                  <button type="button" id="clearLogsBtn" class="btn-ghost btn-sm">Clear</button>
+                  <button type="button" id="copyLogsBtn" class="btn-ghost btn-sm">Copy</button>
+                </div>
+              </div>
+
+              <div id="progressContainer" class="progress-wrap" style="display: none;">
+                <div class="progress-meta">
+                  <span id="progressLabel">Initializing...</span>
+                  <span id="progressPct">0%</span>
+                </div>
+                <div class="progress-track">
+                  <div id="progressBar" class="progress-fill"></div>
+                </div>
+              </div>
+
+              <div id="buildStatus" class="result-banner" style="display: none;"></div>
+
+              <textarea id="consoleBox" readonly spellcheck="false" placeholder="Build logs, encryption status, and apksigner output will stream here..."></textarea>
+
+              <button type="button" id="buildBtn" class="btn-primary btn-lg trigger-build-btn" style="margin-top: 12px;">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2">
+                  <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                </svg>
+                <span>Compile &amp; Sign Encrypted APK</span>
+              </button>
+            </section>
+          </div>
+        </div>
+
+        <!-- BUILDS ARCHIVE VIEW -->
+        <div id="view-builds" class="view-section">
+          <section class="card">
+            <div class="card-header">
+              <div>
+                <h2>Compiled APK Releases</h2>
+                <p class="card-desc">Signed, 4-byte aligned packages stored in ~/apk-workstation/builds</p>
+              </div>
+              <button type="button" id="refreshBuildsBtn" class="btn-ghost btn-sm">Refresh</button>
+            </div>
+            <div id="buildsList" class="item-list"></div>
+          </section>
+        </div>
+
+        <!-- KEYSTORES VAULT VIEW -->
+        <div id="view-keystores" class="view-section two-col-grid">
+          <section class="card">
+            <div class="card-header">
+              <div>
+                <h2>Keystore Vault</h2>
+                <p class="card-desc">Inspect SHA-256 certificate fingerprints or delete unused keys</p>
+              </div>
+            </div>
+            <div id="keystoreList" class="item-list"></div>
+          </section>
+
+          <section class="card">
+            <div class="card-header">
+              <div>
+                <h2>Generate 2048-bit Keystore</h2>
+                <p class="card-desc">Create a new RSA signing key valid for 10,000 days</p>
+              </div>
+            </div>
+
+            <div class="field">
+              <label for="newKsAlias">Key Alias &amp; Filename</label>
+              <input type="text" id="newKsAlias" placeholder="e.g. production_key">
+            </div>
+            <div class="field">
+              <label for="newKsPass">Keystore &amp; Key Password (min 6 chars)</label>
+              <input type="password" id="newKsPass" placeholder="Enter strong password">
+            </div>
+            <div class="field">
+              <label for="newKsDname">Certificate Distinguished Name (DName)</label>
+              <input type="text" id="newKsDname" value="CN=Resteus, OU=Dev, O=Workstation, C=PH">
+            </div>
+            <button type="button" id="createKsBtn" class="btn-primary" style="width: 100%; margin-top: 8px;">
+              Generate Signing Keystore
+            </button>
+          </section>
+
+          <section class="card">
+            <div class="card-header">
+              <div>
+                <h2>Android Platform SDK (android.jar)</h2>
+                <p class="card-desc">Future-proof compiler framework for API 36, 37, 38+ releases</p>
+              </div>
+              <span id="sdkApiBadge" class="badge-pill">Checking...</span>
+            </div>
+            <p id="sdkInfoText" class="muted-text" style="margin-bottom: 12px;">Inspecting libs/android.jar...</p>
+            <div class="field">
+              <label>Replace with newer android.jar (optional)</label>
+              <label class="dropzone" for="sdkJarInput">
+                <input type="file" id="sdkJarInput" accept=".jar">
+                <div class="dropzone-inner" id="sdkJarLabel">
+                  <span>Tap to select updated android.jar</span>
+                </div>
+              </label>
+            </div>
+            <button type="button" id="uploadSdkBtn" class="btn-ghost" style="width: 100%; margin-top: 8px;">
+              Install Updated Platform SDK
+            </button>
+          </section>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- KEYSTORE CERTIFICATE INSPECTOR MODAL -->
+  <div id="ksModal" class="modal-backdrop" style="display: none;">
+    <div class="modal-card">
+      <div class="card-header">
+        <div>
+          <h2 id="ksModalTitle">Certificate Details</h2>
+          <p class="card-desc">SHA-256 fingerprint used for runtime anti-tamper binding</p>
+        </div>
+        <button type="button" id="closeKsModalBtn" class="btn-ghost btn-sm">Close</button>
+      </div>
+      <pre id="ksModalBody" class="cert-pre"></pre>
+    </div>
+  </div>
+
+  <script src="/assets/js/main.js"></script>
+</body>
+</html>

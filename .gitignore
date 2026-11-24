@@ -1,0 +1,16 @@
+__pycache__/
+*.py[cod]
+.venv/
+*.log
+*.pid
+*.bak
+*.tmp
+keystores/
+*.jks
+*.keystore
+*.apk
+builds/
+backups/
+profiles/
+projects/
+tmp/
